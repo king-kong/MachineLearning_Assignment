@@ -222,9 +222,6 @@ hljs.initHighlightingOnLoad();
 <pre><code class="r">library(e10701)
 </code></pre>
 
-<pre><code>## Error: there is no package called &#39;e10701&#39;
-</code></pre>
-
 <pre><code class="r">inTrain &lt;- createDataPartition(y = ass_clean$classe, p = 0.7, list = FALSE)
 training &lt;- ass_clean[inTrain, ]
 testing &lt;- ass_clean[-inTrain, ]
@@ -241,9 +238,6 @@ training_sample &lt;- training[sample(1:nrow(training), 10000, replace = FALSE),
 
 <pre><code class="r">library(caret)
 library(e10701)
-</code></pre>
-
-<pre><code>## Error: there is no package called &#39;e10701&#39;
 </code></pre>
 
 <pre><code class="r">rd_fit &lt;- train(classe ~ ., training_sample, method = &quot;rf&quot;, preProcess = c(&quot;pca&quot;), 
@@ -285,9 +279,6 @@ library(e10701)
 
 <pre><code class="r">library(caret)
 library(e10701)
-</code></pre>
-
-<pre><code>## Error: there is no package called &#39;e10701&#39;
 </code></pre>
 
 <pre><code class="r">testing_results &lt;- predict(rd_fit, newdata = testing)
