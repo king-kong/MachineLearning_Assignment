@@ -1,0 +1,61 @@
+Machine Learning Assignment
+========================================================
+
+**Summary**
+
+This document summarizes the analysis that was perform to build a predictive model for data from a fitness gadget to predict exercise class.   
+
+The final classification method used was Random Forests with cross validation of 10-folds.   The data set provided was too large for my laptop (and i started this assignment too late!).   Hence, I ran the training only a randomly sample of the partitioned training set (10000 records).   As a result, the model had a poorer than expected performance compared to other models.  After creating the model, it was used to predict on the testing set and a confusion matrix was created (Accuracy :0.9628, 95% CI : (0.9576, 0.9675)).   The number of variabled tried at each step was 2. 
+
+**Data Analysis**
+
+Importing the data:
+
+```{r cache=TRUE }
+ass <- read.csv("pml-training.csv")
+```
+
+Upon inspecting the data, it was found that there were many columns there were N/A or are irrelevant to exercise class (e.g. subject name).   Only the measurements from the gadget were used.  'classe' was already a factor after the import.
+
+```{r cache=TRUE}
+ass_clean <- ass[,c('roll_belt','pitch_belt','yaw_belt','total_accel_belt','gyros_belt_x','gyros_belt_y','gyros_belt_z','accel_belt_x','accel_belt_y','accel_belt_z','magnet_belt_x','magnet_belt_y','magnet_belt_z','roll_forearm','pitch_forearm','yaw_forearm','total_accel_forearm','gyros_forearm_x','gyros_forearm_y','gyros_forearm_z','accel_forearm_x','accel_forearm_y','accel_forearm_z','magnet_forearm_x','magnet_forearm_y','magnet_forearm_z','roll_arm','pitch_arm','yaw_arm','total_accel_arm','gyros_arm_x','gyros_arm_y','gyros_arm_z','accel_arm_x','accel_arm_y','accel_arm_z','magnet_arm_x','magnet_arm_y','magnet_arm_z','roll_dumbbell','pitch_dumbbell','yaw_dumbbell','total_accel_dumbbell','gyros_dumbbell_x','gyros_dumbbell_y','gyros_dumbbell_z','accel_dumbbell_x','accel_dumbbell_y','accel_dumbbell_z','magnet_dumbbell_x','magnet_dumbbell_y','magnet_dumbbell_z','classe')]
+```
+
+On this set of data, partition it into training and testing.
+
+```{r cache=TRUE}
+library(caret)
+library(e10701)
+inTrain <- createDataPartition(y=ass_clean$classe, p=0.7, list=FALSE)
+training <- ass_clean[inTrain,]
+testing <- ass_clean[-inTrain,]
+```
+
+Because of time contraints, a 10000 random of the training data set was taken for the model building. 
+
+```{r cache=TRUE}
+set.seed(12345)
+training_sample <- training[sample(1:nrow(training), 10000, replace=FALSE),]
+```
+
+Create a model based on the training_sample set.  PCA was use for preprocess to remove unnecessary features and cross validation was used to better calculate the accuracy.   The default 10-fold was used.   
+
+
+```{r cache=TRUE}
+library(caret)
+library(e10701)
+rd_fit <- train(classe ~ ., training_sample, method="rf", preProcess=c("pca"), trControl= trainControl(method="cv"))
+```
+
+**Model Out-of-Sample Error and Model Diagnostics Discussion**
+
+Since there are plenty of samples available, it is possible to further increase K until the Accuracy decreases due to increase in bias.  It will decrease variance, hence a smaller .95 confidence interval to ensure the Accuracy can be counted on for statistical inference.
+
+In terms of gauging Accuracy, the following code snippet was used to create a confusion matrix on the testing set.
+
+```{r cache=TRUE}
+library(caret)
+library(e10701)
+testing_results <- predict(rd_fit, newdata = testing)
+confusionMatrix(testing_results, testing$classe)
+```
